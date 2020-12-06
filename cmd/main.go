@@ -15,7 +15,8 @@ func main() {
 
 	e.Logger.Fatal(e.Start(":1323"))*/
 
-	connectionString := "postgres://postgres:qwerty1221@localhost/forumService?sslmode=disable"
+	//TODO добавить методы для взаимодействия с БД (SERVICE)
+	connectionString := "postgres://postgres:qwerty1221@localhost/forum?sslmode=disable"
 	config, err := pgx.ParseURI(connectionString)
 	if err != nil {
 		fmt.Println(err)

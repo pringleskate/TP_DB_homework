@@ -20,11 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a673b35d-b2ee-42db-9301-670e2b125de5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/models/forum.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/services/forumService/service.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/storages/threadStorage/storage.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/storages/userStorage/storage.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/services/forumService.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/storages/databaseService/service.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/storages/voteStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/models/forum.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/forum.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/services/forumService/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/threadStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/threadStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/userStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/userStorage/storage.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +64,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../2020_2_ExtraSafe" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../awesomeProject" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
@@ -77,27 +84,5 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="1111" y="269" width="424" height="491" key="FileChooserDialogImpl" timestamp="1606293120915">
-      <screen x="0" y="27" width="1920" height="969" />
-    </state>
-    <state x="1111" y="269" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.969@0.27.1920.969" timestamp="1606293120915" />
-    <state x="721" y="334" width="467" height="362" key="com.goide.refactor.move.GoMoveDeclarationDialog" timestamp="1605775982951">
-      <screen x="0" y="27" width="1920" height="969" />
-    </state>
-    <state x="721" y="334" width="467" height="362" key="com.goide.refactor.move.GoMoveDeclarationDialog/0.27.1920.969@0.27.1920.969" timestamp="1605775982951" />
-    <state x="741" y="426" width="438" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1605777832057">
-      <screen x="0" y="27" width="1920" height="969" />
-    </state>
-    <state x="741" y="426" width="438" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.969@0.27.1920.969" timestamp="1605777832057" />
-    <state x="1060" y="127" width="760" height="769" key="dock-window-1" timestamp="1605855837878">
-      <screen x="0" y="27" width="1920" height="969" />
-    </state>
-    <state x="1060" y="127" width="760" height="769" key="dock-window-1/0.27.1920.969@0.27.1920.969" timestamp="1605855837878" />
-    <state x="943" y="238" width="672" height="678" key="search.everywhere.popup" timestamp="1605540546392">
-      <screen x="0" y="27" width="1920" height="969" />
-    </state>
-    <state x="943" y="238" width="672" height="678" key="search.everywhere.popup/0.27.1920.969@0.27.1920.969" timestamp="1605540546392" />
   </component>
 </project>

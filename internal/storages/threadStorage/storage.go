@@ -1,6 +1,7 @@
 package threadStorage
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
@@ -11,8 +12,7 @@ type Storage interface {
 	CreateThread(input models.Thread) (thread models.Thread, err error)
 	GetDetails(input models.ThreadInput) (thread models.Thread, err error)
 	UpdateThread(input models.ThreadUpdate) (thread models.Thread, err error)
-	GetPosts(input models.ThreadInput) (posts []models.Post, err error)
-	//TODO Vote
+	GetThreadsByForum(forum string, input models.ForumGetThreads) (threads []models.Thread, err error)
 }
 
 type storage struct {
@@ -33,10 +33,16 @@ var (
 
 	selectBySlug = "SELECT FROM threads (author, created, forum, ID, message, slug, title, votes) WHERE slug = $1"
 	selectByID = "SELECT FROM threads (author, created, forum, ID, message, slug, title, votes) WHERE ID = $1"
+//LIMIT - делаем всегда
+
+	selectThreads = "SELECT id, slug, author, created, forum, title, message, votes FROM threads WHERE forum = $1 ORDER BY created LIMIT $2"
+	selectThreadsSince = "SELECT id, slug, author, created, forum, title, message, votes FROM threads WHERE forum = $1 AND created >= $2 ORDER BY created LIMIT $3"
+	selectThreadsDesc = "SELECT id, slug, author, created, forum, title, message, votes FROM threads WHERE forum = $1 ORDER BY created DESC LIMIT $2"
+	selectThreadsSinceDesc =  "SELECT id, slug, author, created, forum, title, message, votes FROM threads WHERE forum = $1 AND created >= $2 ORDER BY created DESC LIMIT $3"
+
 )
 
 func (s *storage) CreateThread(input models.Thread) (thread models.Thread, err error) {
-	//FIXME сделать один запрос с OR
 	if input.Slug == "" {
 		err = s.db.QueryRow(insertWithoutSlug, input.Author, input.Created, input.Forum, input.Message, input.Title, input.Votes).Scan(&thread.ID)
 	} else {
@@ -54,7 +60,7 @@ func (s *storage) CreateThread(input models.Thread) (thread models.Thread, err e
 		}
 	}
 
-	//TODO сделать отдельную функцию по переприсваиванию полей структур
+	//TODO TAI сделать отдельную функцию по переприсваиванию полей структур
 	thread.Slug = input.Slug
 	thread.Votes = input.Votes
 	thread.Title = input.Title
@@ -62,19 +68,20 @@ func (s *storage) CreateThread(input models.Thread) (thread models.Thread, err e
 	thread.Forum = input.Forum
 	thread.Created = input.Created
 	thread.Author = input.Author
-//	thread.ForumID = input.ForumID
-	//TODO добавить обновление счетчика в форуме
-	//TODO добавить пользователя в форум
+	//TODO service - добавить обновление счетчика в форуме
+	//TODO service - добавить пользователя в форум, если он еще не там
 	return
 }
 
 func (s *storage) GetDetails(input models.ThreadInput) (thread models.Thread, err error) {
+	//TODO переписать на запрос с OR (UpdateThread)
+	slug := sql.NullString{}
 	if input.Slug == "" {
 		err = s.db.QueryRow(selectByID, input.ID).
-					Scan(&thread.Author, thread.Created, thread.Forum, thread.ID, thread.Message, thread.Slug, thread.Title, thread.Votes)
+					Scan(&thread.Author, &thread.Created, &thread.Forum, &thread.ID, &thread.Message, &slug, &thread.Title, &thread.Votes)
 	} else {
 		err = s.db.QueryRow(selectBySlug, input.Slug).
-			Scan(&thread.Author, thread.Created, thread.Forum, thread.ID, thread.Message, thread.Slug, thread.Title, thread.Votes)
+			Scan(&thread.Author, &thread.Created, &thread.Forum, &thread.ID, &thread.Message, &slug, &thread.Title, &thread.Votes)
 	}
 
 	if err != nil {
@@ -86,14 +93,18 @@ func (s *storage) GetDetails(input models.ThreadInput) (thread models.Thread, er
 		return thread, models.Error{Code: "500"}
 	}
 
+	if slug.Valid {
+		thread.Slug = slug.String
+	}
+
 	return
 }
 
 func (s *storage) UpdateThread(input models.ThreadUpdate) (thread models.Thread, err error) {
-
 	// при обновлении ветки может меняться только message и title
 	//в сервисе надо будет заполнять форум
 
+	//TODO slug - nullsqlstring
 	if input.Title != "" && input.Message != "" {
 		err = s.db.QueryRow("UPDATE threads SET message = $1, title = $2 WHERE ID = $3 OR slug = $4 " +
 								"RETURNING author, created, forum, ID, message, slug, title, votes",
@@ -129,6 +140,39 @@ func (s *storage) UpdateThread(input models.ThreadUpdate) (thread models.Thread,
 	return
 }
 
-func (s *storage) GetPosts(input models.ThreadInput) (posts []models.Post, err error) {
+//TODO перед вызовом этой функции проверять в отдельной функции if forum exists
+func (s *storage) GetThreadsByForum(forum string, input models.ForumGetThreads) (threads []models.Thread, err error) {
+	var rows *pgx.Rows
+	if input.Since == "" && !input.Desc {
+		rows, err = s.db.Query(selectThreads, forum, input.Limit)
+	} else if input.Since == "" && input.Desc {
+		rows, err = s.db.Query(selectThreadsDesc, forum, input.Limit)
+	}  else if input.Since != "" && !input.Desc {
+		rows, err = s.db.Query(selectThreadsSince, forum, input.Since, input.Limit)
+	} else if input.Since != "" && input.Desc {
+		rows, err = s.db.Query(selectThreadsSinceDesc, forum, input.Since, input.Limit)
+	}
+
+	if err != nil {
+		return threads, models.Error{Code: "500"}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		thread := models.Thread{}
+		slug := sql.NullString{}
+
+		err = rows.Scan(&thread.ID, &slug, &thread.Author, &thread.Created, &thread.Forum, &thread.Title, &thread.Message, &thread.Votes)
+		if err != nil {
+			return threads, models.Error{Code: "500"}
+		}
+
+		if slug.Valid {
+			thread.Slug = slug.String
+		}
+
+		threads = append(threads, thread)
+	}
+
 	return
 }

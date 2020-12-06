@@ -11,7 +11,6 @@ type Error struct {
 
 func (e Error) Error() string {
 	return e.Code
-	//panic("implement me")
 }
 
 type Forum struct {
@@ -81,15 +80,53 @@ type ThreadUpdate struct {
 	Message  string `json:"message"` // Описание ветки обсуждения.
 }
 
+type ThreadGetPosts struct {
+	Thread int
+	Limit int
+	Since int
+	Sort string
+	Desc bool
+}
+
+type PostInput struct {
+	ID       int  `json:"id"`
+}
+
+type PostUpdate struct {
+	ID       int  `json:"id"`
+	Message string `json:"message"`
+}
+
 type Post struct {
-	ThreadInput
-	//SlagOrID string `json:"-"`
-	ID       int64  `json:"id"`       // Идентификатор данного сообщения.
-	Parent   int64  `json:"parent"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
+	//ThreadInput
+	ID       int  `json:"id"`       // Идентификатор данного сообщения.
+	Parent   int  `json:"parent"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
 	Author   string `json:"author"`   // Автор, написавший данное сообщение.
 	Message  string `json:"message"`  // Собственно сообщение форума.
 	IsEdited bool   `json:"isEdited"` // Истина, если данное сообщение было изменено.
 	Forum    string `json:"forum"`    // Идентификатор форума (slug) данного сообещния.
-//	Thread   int32  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
+	Thread   int  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
 	Created  string `json:"created"`  // Дата создания сообщения на форуме.
+}
+
+type Posts []*Post
+
+type PostFull struct {
+	Author User
+	Forum Forum
+	Post Post
+	Thread Thread
+}
+
+type Vote struct {
+	User string
+	Voice int
+	Thread int
+}
+
+type Status struct {
+	Forum  int32 `json:"forum"`
+	Post   int64 `json:"post"`
+	Thread int32 `json:"thread"`
+	User   int32 `json:"user"`
 }
