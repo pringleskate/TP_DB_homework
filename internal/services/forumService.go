@@ -1,6 +1,6 @@
 package services
 
-import (
+/*import (
 	"github.com/pringleskate/TP_DB_homework/internal/models"
 	"github.com/pringleskate/TP_DB_homework/internal/storages/databaseService"
 	"github.com/pringleskate/TP_DB_homework/internal/storages/forumStorage"
@@ -103,4 +103,4 @@ func (s *service) GetUserProfile(){
 }
 func (s *service) UpdateUserProfile(){
 	return
-}
+}*/

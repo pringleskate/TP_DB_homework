@@ -7,7 +7,7 @@ CREATE TABLE users
     ID       SERIAL NOT NULL PRIMARY KEY,
     nickname CITEXT NOT NULL UNIQUE,
     fullname TEXT   NOT NULL,
-    email    TEXT   NOT NULL,
+    email    TEXT   NOT NULL UNIQUE,
     about    TEXT
 );
 

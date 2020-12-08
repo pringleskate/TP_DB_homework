@@ -16,6 +16,7 @@ type Storage interface {
 	UpdatePostsCount(input models.ForumInput) (err error)
 	AddUserToForum(userID int, forumID int) (err error)
 	CheckIfForumExists(input models.ForumInput) (err error)
+	GetForumID(input models.ForumInput) (ID int, err error)
 }
 
 type storage struct {
@@ -72,7 +73,6 @@ func (s *storage) GetDetails(forumSlug models.ForumInput) (forum models.Forum, e
 }
 
 //TODO 2v можно сделать в userstorage один запрос с джоинами
-//TODO service - check if forum exists
 /*func (s *storage) GetUsers(forumSlug models.ForumGetUsers) (userIDs []int, err error) {
 	rows, err := s.db.Query("SELECT userID FROM forum_users FU JOIN forums F ON F.forumID = FU.forumID WHERE F.slug = $1", forumSlug.Slug)
 	if err != nil {
@@ -132,10 +132,22 @@ func (s *storage) CheckIfForumExists(input models.ForumInput) (err error) {
 	var ID int
 	err = s.db.QueryRow("SELECT ID from forums WHERE slug = $1", input.Slug).Scan(&ID)
 	if err != nil {
-		if err != pgx.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			return models.Error{Code: "404"}
 		}
 		return models.Error{Code: "500"}
+	}
+
+	return
+}
+
+func (s storage) GetForumID(input models.ForumInput) (ID int, err error) {
+	err = s.db.QueryRow("SELECT ID from forums WHERE slug = $1", input.Slug).Scan(&ID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ID, models.Error{Code: "404"}
+		}
+		return ID, models.Error{Code: "500"}
 	}
 
 	return

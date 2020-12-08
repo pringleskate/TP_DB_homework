@@ -10,7 +10,7 @@ type Storage interface {
 	CreatePost(input models.Post) (post models.Post, err error)
 	GetPostDetails(input models.PostInput, post *models.PostFull) (err error)
 	UpdatePost(input models.PostUpdate) (post models.Post, err error)
-	GetPostsByThread(input models.ThreadGetPosts) (posts models.Posts, err error)
+	GetPostsByThread(input models.ThreadGetPosts) (posts []models.Post, err error)
 }
 
 type storage struct {
@@ -28,10 +28,10 @@ func NewStorage(db *pgx.ConnPool) Storage {
 func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 	if input.Parent == 0 {
 		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, array[(select currval('test_posts_id_seq')::integer)]) RETURNING ID",
-			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.Thread).Scan(&post.ID)
+			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.ThreadInput.ID).Scan(&post.ID)
 	} else {
 		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, (SELECT path FROM test_posts WHERE id = $5) || (select currval('test_posts_id_seq')::integer)) RETURNING ID",
-			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.Thread).Scan(&post.ID)
+			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.ThreadInput.ID).Scan(&post.ID)
 	}
 
 	if pqErr, ok := err.(pgx.PgError); ok {
@@ -49,7 +49,7 @@ func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 	post.Forum = input.Forum
 	post.Message = input.Message
 	post.Parent = input.Parent
-	post.Thread = input.Thread
+	post.ThreadInput.ID = input.ThreadInput.ID
 	post.IsEdited = false
 	return
 }
@@ -57,7 +57,7 @@ func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 //TODO заполнение остальной информации о посте в сервисе
 func (s *storage) GetPostDetails(input models.PostInput, post *models.PostFull) (err error) {
 	err = s.db.QueryRow("SELECT author, created, forum, message, ID , edited, parent, thread FROM posts WHERE ID = $1", input.ID).
-				Scan(&post.Post.Author, &post.Post.Created, &post.Post.Forum, &post.Post.Message, &post.Post.ID, &post.Post.IsEdited, &post.Post.Parent, &post.Post.Thread)
+				Scan(&post.Post.Author, &post.Post.Created, &post.Post.Forum, &post.Post.Message, &post.Post.ID, &post.Post.IsEdited, &post.Post.Parent, &post.Post.ThreadInput.ID)
 	if err != nil {
 		return models.Error{Code: "500"}
 	}
@@ -66,7 +66,7 @@ func (s *storage) GetPostDetails(input models.PostInput, post *models.PostFull) 
 
 func (s *storage) UpdatePost(input models.PostUpdate) (post models.Post, err error) {
 	err = s.db.QueryRow("UPDATE posts SET message = $1, edited = $2 WHERE ID = $3 RETURNING author, created, forum, message, ID , edited, parent, thread", input.Message, true, input.ID).
-				Scan(&post.Author, &post.Created, &post.Forum, &post.Message, &post.ID, &post.IsEdited, &post.Parent, &post.Thread)
+				Scan(&post.Author, &post.Created, &post.Forum, &post.Message, &post.ID, &post.IsEdited, &post.Parent, &post.ThreadInput.ID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return post, models.Error{Code: "404"}
@@ -152,7 +152,7 @@ const selectPostsParentTreeLimitDescByID = `
 	WHERE p.thread = $1 and p.path[1] IN (
 		SELECT p2.path[1]
 		FROM post p2
-		WHERE p2.parent IS NULL and p2.thread = $2
+		WHERE p2.parent = 0 and p2.thread = $2
 		ORDER BY p2.path DESC
 		LIMIT $3
 	)
@@ -184,57 +184,57 @@ const selectPostsParentTreeLimitSinceDescByID = `
 	ORDER BY p.path[1] DESC, p.path[2:]
 `
 
-func (s *storage) GetPostsByThread(input models.ThreadGetPosts) (posts models.Posts, err error){
+func (s *storage) GetPostsByThread(input models.ThreadGetPosts) (posts []models.Post, err error){
 	var rows *pgx.Rows
 
 	switch input.Sort {
 	case "flat":
 		if input.Since > 0 {
 			if input.Desc {
-				rows, err = s.db.Query(selectPostsFlatLimitSinceDescByID, input.Thread,
+				rows, err = s.db.Query(selectPostsFlatLimitSinceDescByID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsFlatLimitSinceByID, input.Thread,
+				rows, err = s.db.Query(selectPostsFlatLimitSinceByID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			}
 		} else {
 			if input.Desc == true {
-				rows, err = s.db.Query(selectPostsFlatLimitDescByID, input.Thread, input.Limit)
+				rows, err = s.db.Query(selectPostsFlatLimitDescByID, input.ThreadInput.ID, input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsFlatLimitByID, input.Thread, input.Limit)
+				rows, err = s.db.Query(selectPostsFlatLimitByID, input.ThreadInput.ID, input.Limit)
 			}
 		}
 	case "tree":
 		if input.Since > 0 {
 			if input.Desc {
-				rows, err = s.db.Query(selectPostsTreeLimitSinceDescByID, input.Thread,
+				rows, err = s.db.Query(selectPostsTreeLimitSinceDescByID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsTreeLimitSinceByID, input.Thread,
+				rows, err = s.db.Query(selectPostsTreeLimitSinceByID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			}
 		} else {
 			if input.Desc {
-				rows, err = s.db.Query(selectPostsTreeLimitDescByID, input.Thread, input.Limit)
+				rows, err = s.db.Query(selectPostsTreeLimitDescByID, input.ThreadInput.ID, input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsTreeLimitByID, input.Thread, input.Limit)
+				rows, err = s.db.Query(selectPostsTreeLimitByID, input.ThreadInput.ID, input.Limit)
 			}
 		}
 	case "parent_tree":
 		if input.Since > 0 {
 			if input.Desc {
-				rows, err = s.db.Query(selectPostsParentTreeLimitSinceDescByID, input.Thread, input.Thread,
+				rows, err = s.db.Query(selectPostsParentTreeLimitSinceDescByID, input.ThreadInput.ID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsParentTreeLimitSinceByID, input.Thread, input.Thread,
+				rows, err = s.db.Query(selectPostsParentTreeLimitSinceByID, input.ThreadInput.ID, input.ThreadInput.ID,
 					input.Since, input.Limit)
 			}
 		} else {
 			if input.Desc {
-				rows, err = s.db.Query(selectPostsParentTreeLimitDescByID, input.Thread, input.Thread,
+				rows, err = s.db.Query(selectPostsParentTreeLimitDescByID, input.ThreadInput.ID, input.ThreadInput.ID,
 					input.Limit)
 			} else {
-				rows, err = s.db.Query(selectPostsParentTreeLimitByID, input.Thread, input.Thread,
+				rows, err = s.db.Query(selectPostsParentTreeLimitByID, input.ThreadInput.ID, input.ThreadInput.ID,
 					input.Limit)
 			}
 		}
@@ -248,12 +248,12 @@ func (s *storage) GetPostsByThread(input models.ThreadGetPosts) (posts models.Po
 	for rows.Next() {
 		post := models.Post{}
 
-		err = rows.Scan(&post.ID, &post.Author, &post.Created, &post.IsEdited, &post.Message, &post.Parent, &post.Thread, &post.Forum)
+		err = rows.Scan(&post.ID, &post.Author, &post.Created, &post.IsEdited, &post.Message, &post.Parent, &post.ThreadInput.ID, &post.Forum)
 		if err != nil {
 			return posts, models.Error{Code: "500"}
 		}
 
-		posts = append(posts, &post)
+		posts = append(posts, post)
 	}
 
 	return 

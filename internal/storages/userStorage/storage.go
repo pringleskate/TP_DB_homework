@@ -10,8 +10,8 @@ import (
 
 type Storage interface {
 	CreateUser(input models.User) (user models.User, err error)
-	GetProfile(input models.UserInput) (user models.User, err error)
-	UpdateProfile(nickname models.UserInput, input models.User) (user models.User, err error)
+	GetProfile(input string) (user models.User, err error)
+	UpdateProfile(input models.User) (user models.User, err error)
 	GetUsers(input models.ForumGetUsers, forumID int) (users []models.User, err error)
 //	GetUsers(userIDs []int, conditions models.ForumGetUsers) (users []models.User, err error)
 }
@@ -21,7 +21,6 @@ type storage struct {
 }
 
 /* constructor */
-//func NewStorage(db *pgxpool.Pool) Storage {
 func NewStorage(db *pgx.ConnPool) Storage {
 	return &storage{
 		db: db,
@@ -37,7 +36,7 @@ var (
 )
 
 func (s *storage) CreateUser(input models.User) (user models.User, err error) {
-	//TODO посмотреть, как pgx будет реагировать на null значения, если что сделать default значения в БД
+	//TODO посмотреть, как pgx будет реагировать на null значения, если что сделать default значения в БД (NULL STRING)
 	_, err = s.db.Exec("INSERT INTO users (nickname, email, fullname, about) VALUES ($1, $2, $3, $4)",
 						input.Nickname, input.Fullname, input.Email, input.About)
 
@@ -58,9 +57,9 @@ func (s *storage) CreateUser(input models.User) (user models.User, err error) {
 	return
 }
 
-func (s *storage) GetProfile(input models.UserInput) (user models.User, err error) {
-	user.Nickname = input.Nickname
-	err = s.db.QueryRow("SELECT fullname, email, about FROM users WHERE nickname = $1", input.Nickname).
+func (s *storage) GetProfile(input string) (user models.User, err error) {
+	user.Nickname = input
+	err = s.db.QueryRow("SELECT fullname, email, about FROM users WHERE nickname = $1", input).
 				Scan(&user.Fullname, &user.Email, &user.About)
 
 	if err != nil {
@@ -75,9 +74,9 @@ func (s *storage) GetProfile(input models.UserInput) (user models.User, err erro
 	return
 }
 
-func (s *storage) UpdateProfile(nickname models.UserInput, input models.User) (user models.User, err error) {
+func (s *storage) UpdateProfile(input models.User) (user models.User, err error) {
 	res, err := s.db.Exec("UPDATE users SET nickname = $1, fullname = $2, email = $3, about = $4 WHERE nickname = $5",
-						input.Nickname, input.Fullname, input.Email, input.About, nickname.Nickname)
+						input.Nickname, input.Fullname, input.Email, input.About, input.Nickname)
 
 	if pqErr, ok := err.(pgx.PgError); ok {
 		switch pqErr.Code {

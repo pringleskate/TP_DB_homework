@@ -12,7 +12,8 @@ type Storage interface {
 	CreateThread(input models.Thread) (thread models.Thread, err error)
 	GetDetails(input models.ThreadInput) (thread models.Thread, err error)
 	UpdateThread(input models.ThreadUpdate) (thread models.Thread, err error)
-	GetThreadsByForum(forum string, input models.ForumGetThreads) (threads []models.Thread, err error)
+	GetThreadsByForum(input models.ForumGetThreads) (threads []models.Thread, err error)
+	CheckThreadIfExists(input models.ThreadInput) (thread models.ThreadInput, err error)
 }
 
 type storage struct {
@@ -141,16 +142,16 @@ func (s *storage) UpdateThread(input models.ThreadUpdate) (thread models.Thread,
 }
 
 //TODO перед вызовом этой функции проверять в отдельной функции if forum exists
-func (s *storage) GetThreadsByForum(forum string, input models.ForumGetThreads) (threads []models.Thread, err error) {
+func (s *storage) GetThreadsByForum(input models.ForumGetThreads) (threads []models.Thread, err error) {
 	var rows *pgx.Rows
 	if input.Since == "" && !input.Desc {
-		rows, err = s.db.Query(selectThreads, forum, input.Limit)
+		rows, err = s.db.Query(selectThreads, input.Slug, input.Limit)
 	} else if input.Since == "" && input.Desc {
-		rows, err = s.db.Query(selectThreadsDesc, forum, input.Limit)
+		rows, err = s.db.Query(selectThreadsDesc,  input.Slug, input.Limit)
 	}  else if input.Since != "" && !input.Desc {
-		rows, err = s.db.Query(selectThreadsSince, forum, input.Since, input.Limit)
+		rows, err = s.db.Query(selectThreadsSince,  input.Slug, input.Since, input.Limit)
 	} else if input.Since != "" && input.Desc {
-		rows, err = s.db.Query(selectThreadsSinceDesc, forum, input.Since, input.Limit)
+		rows, err = s.db.Query(selectThreadsSinceDesc,  input.Slug, input.Since, input.Limit)
 	}
 
 	if err != nil {
@@ -172,6 +173,23 @@ func (s *storage) GetThreadsByForum(forum string, input models.ForumGetThreads) 
 		}
 
 		threads = append(threads, thread)
+	}
+
+	return
+}
+
+func (s storage) CheckThreadIfExists(input models.ThreadInput) (thread models.ThreadInput, err error) {
+	if input.Slug == "" {
+		err = s.db.QueryRow("SELECT ID from threads WHERE ID = $1", input.ID).Scan(&thread.ID)
+	} else {
+		err = s.db.QueryRow("SELECT ID from threads WHERE slug = $1", input.Slug).Scan(&thread.ID)
+	}
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return thread, models.Error{Code: "404"}
+		}
+		return thread, models.Error{Code: "500"}
 	}
 
 	return
