@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -19,10 +20,12 @@ func (h handler) ThreadCreate(c *fasthttp.RequestCtx) {
 
 	thread, err := h.Service.CreateThread(*threadInput)
 	if err != nil {
+		fmt.Println(err)
 		status, respErr, _ := h.ConvertError(err)
 		if status == fasthttp.StatusConflict {
 			response, _ := thread.MarshalJSON()
 			h.WriteResponse(c, status, response)
+			return
 		}
 		h.WriteResponse(c, status, respErr)
 		return
@@ -37,7 +40,7 @@ func (h handler) ThreadCreate(c *fasthttp.RequestCtx) {
 func (h handler) ThreadVote(c *fasthttp.RequestCtx) {
 	voteInput := &models.Vote{}
 
-	err :=voteInput.UnmarshalJSON(c.PostBody())
+	err := voteInput.UnmarshalJSON(c.PostBody())
 	if err != nil {
 		log.Println(err)
 		return
@@ -54,7 +57,7 @@ func (h handler) ThreadVote(c *fasthttp.RequestCtx) {
 
 	response, _ := json.Marshal(thread)
 
-	h.WriteResponse(c, fasthttp.StatusCreated, response)
+	h.WriteResponse(c, fasthttp.StatusOK, response)
 	return
 }
 
@@ -70,7 +73,7 @@ func (h handler) ThreadGet(c *fasthttp.RequestCtx) {
 
 	response, _ := json.Marshal(thread)
 
-	h.WriteResponse(c, fasthttp.StatusCreated, response)
+	h.WriteResponse(c, fasthttp.StatusOK, response)
 	return
 }
 
@@ -84,7 +87,7 @@ func (h handler) ThreadUpdate(c *fasthttp.RequestCtx) {
 
 	slagOrID := SlagOrID(c)
 
-	threadInput.ID = slagOrID.ID
+	threadInput.ThreadID = slagOrID.ThreadID
 	threadInput.Slug = slagOrID.Slug
 
 	thread, err := h.Service.UpdateThread(*threadInput)
@@ -96,7 +99,7 @@ func (h handler) ThreadUpdate(c *fasthttp.RequestCtx) {
 
 	response, _ := json.Marshal(thread)
 
-	h.WriteResponse(c, fasthttp.StatusCreated, response)
+	h.WriteResponse(c, fasthttp.StatusOK, response)
 	return
 }
 
@@ -109,7 +112,7 @@ func (h handler) ThreadGetPosts(c *fasthttp.RequestCtx) {
 	}
 
 	slugOrID := SlagOrID(c)
-	threadInput.ID = slugOrID.ID
+	threadInput.ThreadID = slugOrID.ThreadID
 	threadInput.Slug = slugOrID.Slug
 
 	posts, err := h.Service.GetThreadPosts(threadInput)
@@ -121,7 +124,7 @@ func (h handler) ThreadGetPosts(c *fasthttp.RequestCtx) {
 
 	response, _ := json.Marshal(posts)
 
-	h.WriteResponse(c, fasthttp.StatusCreated, response)
+	h.WriteResponse(c, fasthttp.StatusOK, response)
 	return
 }
 

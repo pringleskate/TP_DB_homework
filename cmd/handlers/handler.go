@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
 	"github.com/pringleskate/TP_DB_homework/internal/services"
@@ -54,12 +55,12 @@ func (h handler) ConvertError(someError error) (status int, body []byte, err err
 		return status, body, errors.New("it is not server error")
 	}
 
-	body, err = Error.Message.MarshalJSON()
+	body, err = json.Marshal(Error)
 	if err != nil {
 		return status, body, err
 	}
 
-	status, err = strconv.Atoi(err.(models.Error).Code)
+	status, err = strconv.Atoi(Error.Code)
 	if err != nil {
 		return status, body, err
 	}
@@ -83,6 +84,6 @@ func SlagOrID(c *fasthttp.RequestCtx) (output models.ThreadInput) {
 		output.Slug = slagOrID
 		return output
 	}
-	output.ID = id
+	output.ThreadID = id
 	return output
 }

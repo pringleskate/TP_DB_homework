@@ -9,9 +9,11 @@ type RespError struct {
 	Message string `json:"message"`
 }
 
+//easyjson:json
 type Error struct {
-	Code string
-	Message RespError
+	Code string `json:"-"`
+	Message string `json:"message"`
+	//Message RespError
 }
 
 func (e Error) Error() string {
@@ -20,11 +22,11 @@ func (e Error) Error() string {
 
 //easyjson:json
 type Forum struct {
-	Slug string `json:"slug"`
-	Title string `json:"title"`
-	User string `json:"user"`
-	Threads int `json:"threads"`
-	Posts int `json:"posts"`
+	Slug string `json:"slug,omitempty"`
+	Title string `json:"title,omitempty"`
+	User string `json:"user,omitempty"`
+	Threads int `json:"threads,omitempty"`
+	Posts int `json:"posts,omitempty"`
 }
 
 //easyjson:json
@@ -58,27 +60,28 @@ type UserInput struct {
 
 //easyjson:json
 type User struct {
-	Nickname string `json:"-"`
-	Fullname string `json:"fullname"`
-	Email string `json:"email"`
-	About string `json:"about"`
+	Nickname string `json:"nickname,omitempty"`
+	Fullname string `json:"fullname,omitempty"`
+	Email string `json:"email,omitempty"`
+	About string `json:"about,omitempty"`
 }
 
 //easyjson:json
 type Thread struct {
-	Author  string    `json:"author"`
-	Created time.Time `json:"created"`
-	Forum   string    `json:"forumService"`
-	ID      int       `json:"id"`
-	Message string    `json:"message"`
-	Slug    string    `json:"slug"`
-	Title   string    `json:"title"`
-	Votes   int       `json:"votes"`
+	Author  string    `json:"author,omitempty"`
+	Created time.Time `json:"created,omitempty"`
+	Forum   string    `json:"forum,omitempty"`
+	ID      int       `json:"id,omitempty"`
+	Message string    `json:"message,omitempty"`
+	Slug    string    `json:"slug,omitempty"`
+	Title   string    `json:"title,omitempty"`
+	Votes   int       `json:"votes,omitempty"`
 }
 
+//easyjson:json
 type ThreadInput struct {
-	ID  int
-	Slug string
+	ThreadID int    `json:"thread"`
+	Slug     string `json:"-"`
 }
 
 //easyjson:json
@@ -108,27 +111,27 @@ type PostUpdate struct {
 }
 //easyjson:json
 type PostCreate struct {
-	Parent   int64  `json:"parent"`
-	Author   string `json:"author"`
-	Message  string `json:"message"`
+	Parent   int  `json:"parent,omitempty"`
+	Author   string `json:"author,omitempty"`
+	Message  string `json:"message,omitempty"`
 }
 //easyjson:json
 type Post struct {
 	ThreadInput
 	//SlagOrID string `json:"-"`
-	ID       int64  `json:"id,omitempty"`       // Идентификатор данного сообщения.
-	Parent   int64  `json:"parent,omitempty"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
+	ID       int  `json:"id,omitempty"`       // Идентификатор данного сообщения.
+	Parent   int  `json:"parent,omitempty"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
 	Author   string `json:"author,omitempty"`   // Автор, написавший данное сообщение.
 	Message  string `json:"message,omitempty"`  // Собственно сообщение форума.
 	IsEdited bool   `json:"isEdited,omitempty"` // Истина, если данное сообщение было изменено.
 	Forum    string `json:"forum,omitempty"`    // Идентификатор форума (slug) данного сообещния.
 	//	Thread   int32  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
-	Created  string `json:"created,omitempty"`  // Дата создания сообщения на форуме.
+	Created  time.Time `json:"created,omitempty"`  // Дата создания сообщения на форуме.
 }
 /*
 type Post struct {
 	//ThreadInput
-	ID       int  `json:"id"`       // Идентификатор данного сообщения.
+	ThreadID       int  `json:"id"`       // Идентификатор данного сообщения.
 	Parent   int  `json:"parent"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
 	Author   string `json:"author"`   // Автор, написавший данное сообщение.
 	Message  string `json:"message"`  // Собственно сообщение форума.
@@ -143,10 +146,10 @@ type Post struct {
 
 //easyjson:json
 type PostFull struct {
-	Author User `json:"author,omitempty"`
-	Forum Forum `json:"forum,omitempty"`
-	Post Post `json:"post,omitempty"`
-	Thread Thread `json:"thread,omitempty"`
+	Author *User `json:"author,omitempty"`
+	Forum *Forum `json:"forum,omitempty"`
+	Post *Post `json:"post,omitempty"`
+	Thread *Thread `json:"thread,omitempty"`
 }
 
 //easyjson:json

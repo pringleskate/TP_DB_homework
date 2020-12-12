@@ -18,11 +18,13 @@ func (h handler) UserCreate(c *fasthttp.RequestCtx) {
 
 	user, err := h.Service.CreateUser(*userInput)
 
+
 	if err != nil {
 		status, respErr, _ := h.ConvertError(err)
 		if status == fasthttp.StatusConflict {
 			response, _ := json.Marshal(user)
 			h.WriteResponse(c, status, response)
+			return
 		}
 		h.WriteResponse(c, status, respErr)
 		return

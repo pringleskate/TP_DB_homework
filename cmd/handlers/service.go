@@ -18,7 +18,7 @@ func (h handler) Status(c *fasthttp.RequestCtx) {
 
 	response, _ := json.Marshal(status)
 
-	h.WriteResponse(c, fasthttp.StatusCreated, response)
+	h.WriteResponse(c, fasthttp.StatusOK, response)
 	return
 }
 

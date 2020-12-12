@@ -6,18 +6,29 @@ import (
 	"github.com/valyala/fasthttp"
 	"log"
 	"strconv"
-	"strings"
 )
 
 func (h handler) PostsCreate(c *fasthttp.RequestCtx) {
-	postsInput := new([]models.PostCreate)
-	err := json.Unmarshal(c.PostBody(), postsInput)
+	postsInput := make([]models.PostCreate, 0)
+	threadInput := models.ThreadInput{}
+	err := json.Unmarshal(c.PostBody(), &postsInput)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	posts, err := h.Service.CreatePosts(*postsInput, c.UserValue("slug_or_id").(string))
+	/*if len(postsInput) == 0 {
+		response, _ := json.Marshal(postsInput)
+
+		h.WriteResponse(c, fasthttp.StatusCreated, response)
+		return
+	}*/
+
+	slugOrID := SlagOrID(c)
+	threadInput.ThreadID = slugOrID.ThreadID
+	threadInput.Slug = slugOrID.Slug
+
+	posts, err := h.Service.CreatePosts(postsInput, threadInput)
 	if err != nil {
 		status, respErr, _ := h.ConvertError(err)
 		h.WriteResponse(c, status, respErr)
@@ -33,7 +44,7 @@ func (h handler) PostsCreate(c *fasthttp.RequestCtx) {
 func (h handler) PostGet(c *fasthttp.RequestCtx) {
 	id, _ := strconv.Atoi(c.UserValue("id").(string))
 	related := c.QueryArgs().Peek("related")
-	post, err := h.Service.GetPost(id, strings.Split(string(related), ","))
+	post, err := h.Service.GetPost(id, string(related))
 	if err != nil {
 		status, respErr, _ := h.ConvertError(err)
 		h.WriteResponse(c, status, respErr)

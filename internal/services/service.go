@@ -9,6 +9,9 @@ import (
 	"github.com/pringleskate/TP_DB_homework/internal/storages/threadStorage"
 	"github.com/pringleskate/TP_DB_homework/internal/storages/userStorage"
 	"github.com/pringleskate/TP_DB_homework/internal/storages/voteStorage"
+	"math"
+	"strings"
+	"time"
 )
 
 type Service interface {
@@ -27,8 +30,8 @@ type Service interface {
 	UpdateThread(input models.ThreadUpdate) (models.Thread, error)
 	GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, error)
 
-	CreatePosts(input []models.PostCreate, slagOrID string) ([]models.Post, error)
-	GetPost(id int, related []string) ([]models.PostFull, error)
+	CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error)
+	GetPost(id int, related string) (models.PostFull, error)
 	UpdatePost(input models.PostUpdate) (models.Post, error)
 
 	Clear()
@@ -56,7 +59,21 @@ func NewService(forumStorage forumStorage.Storage, threadStorage threadStorage.S
 }
 
 func (s service) CreateForum(input models.ForumCreate) (models.Forum, error) {
-	return s.forumStorage.CreateForum(input)
+	forum, err := s.forumStorage.CreateForum(input)
+	if err != nil && err.Error() == "409" {
+		oldForum, err := s.forumStorage.GetDetails(models.ForumInput{Slug: input.Slug})
+		if err != nil {
+			return models.Forum{}, err
+		}
+
+		return oldForum, models.Error{Code: "409", Message: "conflict slug"}
+	}
+
+	if err != nil {
+		return models.Forum{}, err
+	}
+
+	return forum, nil
 }
 
 func (s service) GetForum(input models.ForumInput) (models.Forum, error) {
@@ -68,6 +85,9 @@ func (s service) GetForumThreads(input models.ForumGetThreads) ([]models.Thread,
 	if err != nil {
 		return []models.Thread{}, err
 	}
+	if input.Limit == 0 {
+		input.Limit = math.MaxInt32
+	}
 	return s.threadStorage.GetThreadsByForum(input)
 }
 
@@ -77,18 +97,44 @@ func (s service) GetForumUsers(input models.ForumGetUsers) ([]models.User, error
 		return []models.User{}, err
 	}
 
+	if input.Limit == 0 {
+		input.Limit = math.MaxInt32
+	}
 	return s.userStorage.GetUsers(input, forumID)
 }
 
 func (s service) CreateUser(input models.User) ([]models.User, error) {
 	user, err := s.userStorage.CreateUser(input)
+
 	if err == nil {
 		return []models.User{user}, err
 	}
+
+	users := make([]models.User, 0)
 	if err.Error() == "409" {
-		return []models.User{}, err
-		//FIXME достать пользовтелей с тем же имейлом или никнеймом
+		userNick, err := s.userStorage.GetProfile(input.Nickname)
+		if err != nil && err.Error() != "404"{
+			return []models.User{}, err
+		}
+		if err == nil {
+			users = append(users, userNick)
+		}
+
+		if strings.ToLower(userNick.Email) == strings.ToLower(input.Email){
+			return users, models.Error{Code: "409", Message: "conflict"}
+		}
+
+		userEmail, err := s.userStorage.GetEmailConflictUser(input.Email)
+		if err != nil && err.Error() != "404"{
+			return []models.User{}, err
+		}
+		if err == nil {
+			users = append(users, userEmail)
+		}
+
+		return users, models.Error{Code: "409", Message: "conflict"}
 	}
+
 	return []models.User{}, err
 }
 
@@ -97,18 +143,43 @@ func (s service) GetUser(nickname string) (models.User, error) {
 }
 
 func (s service) UpdateUser(input models.User) (models.User, error) {
+	if input.Email == "" && input.Fullname == "" && input.About == "" {
+		return s.userStorage.GetProfile(input.Nickname)
+	}
 	return s.userStorage.UpdateProfile(input)
 }
 
 func (s service) CreateThread(input models.Thread) (models.Thread, error) {
 	thread, err := s.threadStorage.CreateThread(input)
-	if err != nil {
-		return thread, err
+	if err == nil {
+		err = s.forumStorage.UpdateThreadsCount(models.ForumInput{Slug: input.Forum})
+		if err != nil {
+			return models.Thread{}, err
+		}
+		userID, err := s.userStorage.GetUserIDByNickname(input.Author)
+		if err != nil {
+			return models.Thread{}, err
+		}
+
+		forumID, err := s.forumStorage.GetForumID(models.ForumInput{Slug: input.Forum})
+		if err != nil {
+			return models.Thread{}, err
+		}
+
+		err = s.forumStorage.AddUserToForum(userID, forumID)
+		if err != nil && err.Error() != "409" {
+			return models.Thread{}, err
+		}
+
+		return thread, nil
 	}
 
-	err = s.forumStorage.UpdateThreadsCount(models.ForumInput{Slug: input.Slug})
-	if err != nil {
-		return models.Thread{}, err
+	if err.Error() == "409"  {
+		oldThread, err := s.threadStorage.GetDetails(models.ThreadInput{Slug: input.Slug})
+		if err == nil {
+			return oldThread, models.Error{Code: "409"}
+		}
+		return thread, err
 	}
 
 	return thread, err
@@ -119,10 +190,29 @@ func (s service) ThreadVote(input models.Vote) (models.Thread, error) {
 	if err != nil {
 		return models.Thread{}, err
 	}
-
 	input.Thread = thread
 
-	return s.voteStorage.UpdateVote(input)
+	var updateFlag bool
+
+	checkThread, err := s.voteStorage.CheckDoubleVote(input)
+	if err != nil {
+		if err.Error() == "409" {
+			return checkThread, nil
+		}
+		if err.Error() == "500" {
+			return models.Thread{}, err
+		}
+		if err.Error() == "101" {
+			updateFlag = true
+		}
+	}
+
+	output, err := s.voteStorage.CreateVote(input, updateFlag)
+	if err != nil {
+		return models.Thread{}, err
+	}
+
+	return output, nil
 }
 
 func (s service) GetThread(input models.ThreadInput) (models.Thread, error) {
@@ -141,26 +231,120 @@ func (s service) GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, err
 
 	input.ThreadInput = thread
 
+	if input.Limit == 0 {
+		input.Limit = math.MaxInt32
+	}
 	return s.postStorage.GetPostsByThread(input)
 }
 
-//TODO М убрать отсюда slagOrID, а сделать отдельный объект ThreadInput
-func (s service) CreatePosts(input []models.PostCreate, slagOrID string) ([]models.Post, error) {
-	panic("implement me")
-	//posts :=
-}
+func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error) {
+	posts := make([]models.Post, 0)
 
-//TODO что будет иметься в виду в related? Это будут только названия или как?
-//TODO почему возвращается слайс PostFull???????? М
-func (s service) GetPost(id int, related []string) ([]models.PostFull, error) {
-	post := models.PostFull{}
-	err := s.postStorage.GetPostDetails(models.PostInput{ID: id}, &post)
+	forum, err := s.threadStorage.GetForumByThread(&thread)
 	if err != nil {
-		return []models.PostFull{}, err
+		return []models.Post{}, err
 	}
 
-	return []models.PostFull{}, err
-	//TODO проверку на элемент слайса (author и тд)
+	if len(input) == 0 {
+		return []models.Post{}, nil
+	}
+
+	created := time.Now()
+	for _, postInput := range input {
+		post := models.Post{
+			ThreadInput: thread,
+			Parent:      postInput.Parent,
+			Author:      postInput.Author,
+			Message:     postInput.Message,
+			Forum:       forum,
+			Created:     created,
+		}
+
+		if post.Parent != 0 {
+			parentThread, err := s.postStorage.CheckParentPostThread(post.Parent)
+			if err != nil {
+				fmt.Println(err)
+				return []models.Post{}, err
+			}
+
+			if parentThread != post.ThreadID  {
+				return []models.Post{}, models.Error{Code:"409"}
+			}
+		}
+
+		output, err := s.postStorage.CreatePost(post)
+		if err != nil {
+			return []models.Post{}, err
+		}
+
+		posts = append(posts, output)
+
+		err = s.forumStorage.UpdatePostsCount(models.ForumInput{Slug: forum})
+		if err != nil {
+			return []models.Post{}, err
+		}
+	}
+
+	userID, err := s.userStorage.GetUserIDByNickname(input[0].Author)
+	if err != nil {
+		return []models.Post{}, err
+	}
+
+	forumID, err := s.forumStorage.GetForumID(models.ForumInput{Slug: forum})
+	if err != nil {
+		return []models.Post{}, err
+	}
+
+	err = s.forumStorage.AddUserToForum(userID, forumID)
+	if err != nil && err.Error() != "409" {
+		return []models.Post{}, err
+	}
+
+	return posts, nil
+}
+
+func (s service) GetPost(id int, related string) (models.PostFull, error) {
+	postFull := models.PostFull{
+		Author: nil,
+		Forum:  nil,
+		Post:   nil,
+		Thread: nil,
+	}
+	post := new(models.Post)
+	err := s.postStorage.GetPostDetails(models.PostInput{ID: id}, post)
+	postFull.Post = post
+	if err != nil {
+		return models.PostFull{}, err
+	}
+
+	author := new(models.User)
+	if strings.Contains(related, "user") {
+		err = s.userStorage.GetUserForPost(postFull.Post.Author, author)
+		postFull.Author = author
+		if err != nil {
+			return models.PostFull{}, err
+		}
+	}
+
+	forum := new(models.Forum)
+	if strings.Contains(related, "forum") {
+		err = s.forumStorage.GetForumForPost(postFull.Post.Forum, forum)
+		postFull.Forum = forum
+		if err != nil {
+			return models.PostFull{}, err
+		}
+	}
+
+	thread := new(models.Thread)
+	if strings.Contains(related, "thread") {
+		err = s.threadStorage.GetThreadForPost(postFull.Post.ThreadInput, thread)
+		postFull.Thread = thread
+		if err != nil {
+			return models.PostFull{}, err
+		}
+	}
+
+	return postFull, nil
 }
 
 func (s service) UpdatePost(input models.PostUpdate) (models.Post, error) {

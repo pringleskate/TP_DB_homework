@@ -22,6 +22,7 @@ func (h handler) ForumCreate(c *fasthttp.RequestCtx) {
 		if status == fasthttp.StatusConflict {
 			response, _ := forum.MarshalJSON()
 			h.WriteResponse(c, status, response)
+			return
 		}
 		h.WriteResponse(c, status, respErr)
 		return

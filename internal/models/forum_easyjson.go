@@ -41,7 +41,7 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels(in *j
 		case "voice":
 			out.Voice = int(in.Int())
 		case "_":
-			easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(in, &out.Thread)
+			(out.Thread).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -69,7 +69,7 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels(out *
 	{
 		const prefix string = ",\"_\":"
 		out.RawString(prefix)
-		easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels1(out, in.Thread)
+		(in.Thread).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -97,7 +97,7 @@ func (v *Vote) UnmarshalJSON(data []byte) error {
 func (v *Vote) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels(l, v)
 }
-func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(in *jlexer.Lexer, out *ThreadInput) {
+func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(in *jlexer.Lexer, out *User) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -116,55 +116,8 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(in *
 			continue
 		}
 		switch key {
-		case "ID":
-			out.ID = int(in.Int())
-		case "Slug":
-			out.Slug = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels1(out *jwriter.Writer, in ThreadInput) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"ID\":"
-		out.RawString(prefix[1:])
-		out.Int(int(in.ID))
-	}
-	{
-		const prefix string = ",\"Slug\":"
-		out.RawString(prefix)
-		out.String(string(in.Slug))
-	}
-	out.RawByte('}')
-}
-func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(in *jlexer.Lexer, out *User) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
+		case "nickname":
+			out.Nickname = string(in.String())
 		case "fullname":
 			out.Fullname = string(in.String())
 		case "email":
@@ -181,11 +134,17 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(in *
 		in.Consumed()
 	}
 }
-func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(out *jwriter.Writer, in User) {
+func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels1(out *jwriter.Writer, in User) {
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Nickname != "" {
+		const prefix string = ",\"nickname\":"
+		first = false
+		out.RawString(prefix[1:])
+		out.String(string(in.Nickname))
+	}
+	if in.Fullname != "" {
 		const prefix string = ",\"fullname\":"
 		if first {
 			first = false
@@ -195,14 +154,24 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(out 
 		}
 		out.String(string(in.Fullname))
 	}
-	{
+	if in.Email != "" {
 		const prefix string = ",\"email\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Email))
 	}
-	{
+	if in.About != "" {
 		const prefix string = ",\"about\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.About))
 	}
 	out.RawByte('}')
@@ -211,27 +180,27 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(out 
 // MarshalJSON supports json.Marshaler interface
 func (v User) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(&w, v)
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v User) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(w, v)
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *User) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(&r, v)
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *User) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(l, v)
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels1(l, v)
 }
-func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(in *jlexer.Lexer, out *ThreadUpdate) {
+func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(in *jlexer.Lexer, out *ThreadUpdate) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -254,10 +223,8 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(in *
 			out.Title = string(in.String())
 		case "message":
 			out.Message = string(in.String())
-		case "ID":
-			out.ID = int(in.Int())
-		case "Slug":
-			out.Slug = string(in.String())
+		case "thread":
+			out.ThreadID = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -268,7 +235,7 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(in *
 		in.Consumed()
 	}
 }
-func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(out *jwriter.Writer, in ThreadUpdate) {
+func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(out *jwriter.Writer, in ThreadUpdate) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -283,14 +250,9 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(out 
 		out.String(string(in.Message))
 	}
 	{
-		const prefix string = ",\"ID\":"
+		const prefix string = ",\"thread\":"
 		out.RawString(prefix)
-		out.Int(int(in.ID))
-	}
-	{
-		const prefix string = ",\"Slug\":"
-		out.RawString(prefix)
-		out.String(string(in.Slug))
+		out.Int(int(in.ThreadID))
 	}
 	out.RawByte('}')
 }
@@ -298,24 +260,90 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(out 
 // MarshalJSON supports json.Marshaler interface
 func (v ThreadUpdate) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(&w, v)
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ThreadUpdate) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(w, v)
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ThreadUpdate) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ThreadUpdate) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels2(l, v)
+}
+func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(in *jlexer.Lexer, out *ThreadInput) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "thread":
+			out.ThreadID = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(out *jwriter.Writer, in ThreadInput) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"thread\":"
+		out.RawString(prefix[1:])
+		out.Int(int(in.ThreadID))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ThreadInput) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ThreadInput) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ThreadInput) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *ThreadUpdate) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *ThreadInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels3(l, v)
 }
 func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels4(in *jlexer.Lexer, out *Thread) {
@@ -343,7 +371,7 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels4(in *
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Created).UnmarshalJSON(data))
 			}
-		case "forumService":
+		case "forum":
 			out.Forum = string(in.String())
 		case "id":
 			out.ID = int(in.Int())
@@ -369,44 +397,80 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels4(out 
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Author != "" {
 		const prefix string = ",\"author\":"
+		first = false
 		out.RawString(prefix[1:])
 		out.String(string(in.Author))
 	}
-	{
+	if true {
 		const prefix string = ",\"created\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Raw((in.Created).MarshalJSON())
 	}
-	{
-		const prefix string = ",\"forumService\":"
-		out.RawString(prefix)
+	if in.Forum != "" {
+		const prefix string = ",\"forum\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Forum))
 	}
-	{
+	if in.ID != 0 {
 		const prefix string = ",\"id\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int(int(in.ID))
 	}
-	{
+	if in.Message != "" {
 		const prefix string = ",\"message\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Message))
 	}
-	{
+	if in.Slug != "" {
 		const prefix string = ",\"slug\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Slug))
 	}
-	{
+	if in.Title != "" {
 		const prefix string = ",\"title\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Title))
 	}
-	{
+	if in.Votes != 0 {
 		const prefix string = ",\"votes\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int(int(in.Votes))
 	}
 	out.RawByte('}')
@@ -681,13 +745,45 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels8(in *
 		}
 		switch key {
 		case "author":
-			(out.Author).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Author = nil
+			} else {
+				if out.Author == nil {
+					out.Author = new(User)
+				}
+				(*out.Author).UnmarshalEasyJSON(in)
+			}
 		case "forum":
-			(out.Forum).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Forum = nil
+			} else {
+				if out.Forum == nil {
+					out.Forum = new(Forum)
+				}
+				(*out.Forum).UnmarshalEasyJSON(in)
+			}
 		case "post":
-			(out.Post).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Post = nil
+			} else {
+				if out.Post == nil {
+					out.Post = new(Post)
+				}
+				(*out.Post).UnmarshalEasyJSON(in)
+			}
 		case "thread":
-			(out.Thread).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Thread = nil
+			} else {
+				if out.Thread == nil {
+					out.Thread = new(Thread)
+				}
+				(*out.Thread).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -702,13 +798,13 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels8(out 
 	out.RawByte('{')
 	first := true
 	_ = first
-	if true {
+	if in.Author != nil {
 		const prefix string = ",\"author\":"
 		first = false
 		out.RawString(prefix[1:])
-		(in.Author).MarshalEasyJSON(out)
+		(*in.Author).MarshalEasyJSON(out)
 	}
-	if true {
+	if in.Forum != nil {
 		const prefix string = ",\"forum\":"
 		if first {
 			first = false
@@ -716,9 +812,9 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels8(out 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Forum).MarshalEasyJSON(out)
+		(*in.Forum).MarshalEasyJSON(out)
 	}
-	if true {
+	if in.Post != nil {
 		const prefix string = ",\"post\":"
 		if first {
 			first = false
@@ -726,9 +822,9 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels8(out 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Post).MarshalEasyJSON(out)
+		(*in.Post).MarshalEasyJSON(out)
 	}
-	if true {
+	if in.Thread != nil {
 		const prefix string = ",\"thread\":"
 		if first {
 			first = false
@@ -736,7 +832,7 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels8(out 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Thread).MarshalEasyJSON(out)
+		(*in.Thread).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -784,7 +880,7 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels9(in *
 		}
 		switch key {
 		case "parent":
-			out.Parent = int64(in.Int64())
+			out.Parent = int(in.Int())
 		case "author":
 			out.Author = string(in.String())
 		case "message":
@@ -803,19 +899,30 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels9(out 
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Parent != 0 {
 		const prefix string = ",\"parent\":"
+		first = false
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.Parent))
+		out.Int(int(in.Parent))
 	}
-	{
+	if in.Author != "" {
 		const prefix string = ",\"author\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Author))
 	}
-	{
+	if in.Message != "" {
 		const prefix string = ",\"message\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Message))
 	}
 	out.RawByte('}')
@@ -864,9 +971,9 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels10(in 
 		}
 		switch key {
 		case "id":
-			out.ID = int64(in.Int64())
+			out.ID = int(in.Int())
 		case "parent":
-			out.Parent = int64(in.Int64())
+			out.Parent = int(in.Int())
 		case "author":
 			out.Author = string(in.String())
 		case "message":
@@ -876,9 +983,11 @@ func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels10(in 
 		case "forum":
 			out.Forum = string(in.String())
 		case "created":
-			out.Created = string(in.String())
-		case "Slug":
-			out.Slug = string(in.String())
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Created).UnmarshalJSON(data))
+			}
+		case "thread":
+			out.ThreadID = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -897,7 +1006,7 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels10(out
 		const prefix string = ",\"id\":"
 		first = false
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.ID))
+		out.Int(int(in.ID))
 	}
 	if in.Parent != 0 {
 		const prefix string = ",\"parent\":"
@@ -907,7 +1016,7 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels10(out
 		} else {
 			out.RawString(prefix)
 		}
-		out.Int64(int64(in.Parent))
+		out.Int(int(in.Parent))
 	}
 	if in.Author != "" {
 		const prefix string = ",\"author\":"
@@ -949,7 +1058,7 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels10(out
 		}
 		out.String(string(in.Forum))
 	}
-	if in.Created != "" {
+	if true {
 		const prefix string = ",\"created\":"
 		if first {
 			first = false
@@ -957,17 +1066,17 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels10(out
 		} else {
 			out.RawString(prefix)
 		}
-		out.String(string(in.Created))
+		out.Raw((in.Created).MarshalJSON())
 	}
 	{
-		const prefix string = ",\"Slug\":"
+		const prefix string = ",\"thread\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		out.String(string(in.Slug))
+		out.Int(int(in.ThreadID))
 	}
 	out.RawByte('}')
 }
@@ -1118,29 +1227,50 @@ func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels12(out
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Slug != "" {
 		const prefix string = ",\"slug\":"
+		first = false
 		out.RawString(prefix[1:])
 		out.String(string(in.Slug))
 	}
-	{
+	if in.Title != "" {
 		const prefix string = ",\"title\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Title))
 	}
-	{
+	if in.User != "" {
 		const prefix string = ",\"user\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.User))
 	}
-	{
+	if in.Threads != 0 {
 		const prefix string = ",\"threads\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int(int(in.Threads))
 	}
-	{
+	if in.Posts != 0 {
 		const prefix string = ",\"posts\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int(int(in.Posts))
 	}
 	out.RawByte('}')
@@ -1168,4 +1298,75 @@ func (v *Forum) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Forum) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels12(l, v)
+}
+func easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels13(in *jlexer.Lexer, out *Error) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels13(out *jwriter.Writer, in Error) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Error) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels13(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Error) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC8d74561EncodeGithubComPringleskateTPDBHomeworkInternalModels13(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Error) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels13(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Error) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC8d74561DecodeGithubComPringleskateTPDBHomeworkInternalModels13(l, v)
 }
