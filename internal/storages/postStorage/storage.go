@@ -27,10 +27,10 @@ func NewStorage(db *pgx.ConnPool) Storage {
 
 func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 	if input.Parent == 0 {
-		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, array[(select currval('posts_id_seq')::integer)]) RETURNING ID",
+		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, array[(select currval('post_id_seq')::integer)]) RETURNING ID",
 			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.ThreadInput.ThreadID).Scan(&post.ID)
 	} else {
-		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, (SELECT path FROM posts WHERE id = $5) || (select currval('posts_id_seq')::integer)) RETURNING ID",
+		err = s.db.QueryRow("INSERT INTO posts (author, created, forum, message, parent, thread, path) VALUES ($1,$2,$3,$4,$5,$6, (SELECT path FROM posts WHERE id = $5) || (select currval('post_id_seq')::integer)) RETURNING ID",
 			input.Author, input.Created, input.Forum, input.Message, input.Parent, input.ThreadInput.ThreadID).Scan(&post.ID)
 	}
 
