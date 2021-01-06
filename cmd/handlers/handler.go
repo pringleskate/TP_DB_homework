@@ -5,6 +5,10 @@ import (
 	"errors"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
 	"github.com/pringleskate/TP_DB_homework/internal/services"
+	"github.com/pringleskate/TP_DB_homework/internal/storages/forumStorage"
+	"github.com/pringleskate/TP_DB_homework/internal/storages/postStorage"
+	"github.com/pringleskate/TP_DB_homework/internal/storages/threadStorage"
+	"github.com/pringleskate/TP_DB_homework/internal/storages/userStorage"
 	"github.com/valyala/fasthttp"
 	"strconv"
 )
@@ -35,11 +39,19 @@ type Handler interface {
 
 type handler struct {
 	Service services.Service
+	ForumStorage forumStorage.Storage
+	UserStorage userStorage.Storage
+	ThreadStorage threadStorage.Storage
+	PostStorage postStorage.Storage
 }
 
-func NewHandler(Service services.Service) *handler {
+func NewHandler(Service services.Service, ForumStorage forumStorage.Storage, UserStorage userStorage.Storage, ThreadStorage threadStorage.Storage, PostStorage postStorage.Storage) *handler {
 	return &handler{
 		Service: Service,
+		ForumStorage: ForumStorage,
+		UserStorage: UserStorage,
+		ThreadStorage: ThreadStorage,
+		PostStorage: PostStorage,
 	}
 }
 

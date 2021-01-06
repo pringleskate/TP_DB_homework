@@ -10,6 +10,10 @@ CREATE TABLE users
     email    CITEXT   NOT NULL UNIQUE,
     about    TEXT
 );
+--indexes
+CREATE INDEX idx_nick_nick ON users (nickname);
+CREATE INDEX idx_nick_email ON users (email);
+CREATE INDEX idx_nick_cover ON users (nickname, fullname, about, email);
 
 DROP TABLE IF EXISTS forums CASCADE;
 
@@ -22,6 +26,8 @@ CREATE TABLE forums
     title     TEXT                               NOT NULL,
     user_nick CITEXT REFERENCES users (nickname) NOT NULL
 );
+--indexes
+CREATE INDEX idx_forum_slug ON forums using hash(slug);
 
 DROP TABLE IF EXISTS threads CASCADE;
 CREATE TABLE threads
@@ -36,11 +42,15 @@ CREATE TABLE threads
     title   TEXT                            NOT NULL,
     votes   INTEGER DEFAULT 0
 );
+--indexes
+CREATE INDEX idx_thread_id ON threads(id);
+CREATE INDEX idx_thread_slug ON threads(slug);
+CREATE INDEX idx_thread_coverage ON threads (forum, created, id, slug, author, title, message, votes);
 
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts
 (
-    ID      SERIAL                          NOT NULL,
+    ID      SERIAL                          NOT NULL PRIMARY KEY,
     author  CITEXT                          NOT NULL REFERENCES users (nickname),
     created TIMESTAMP WITH TIME ZONE,
     edited  BOOLEAN DEFAULT false           NOT NULL,
@@ -50,6 +60,9 @@ CREATE TABLE posts
     thread  INTEGER REFERENCES threads (ID) NOT NULL,
     path    INTEGER[] DEFAULT '{0}':: INTEGER [] NOT NULL
 );
+--indexes
+CREATE INDEX ON posts(thread, id, created, author, edited, message, parent, forum);
+CREATE INDEX idx_post_thread_id_p_i ON posts (thread, (path[1]), id);
 
 DROP TABLE IF EXISTS forum_users;
 CREATE TABLE forum_users
@@ -58,6 +71,7 @@ CREATE TABLE forum_users
     userID  INTEGER REFERENCES users (ID)
 );
 ALTER TABLE IF EXISTS forum_users ADD CONSTRAINT uniq UNIQUE (forumID, userID);
+CREATE INDEX idx_forum_user ON forum_users (forumID, userID);
 
 DROP TABLE IF EXISTS votes;
 CREATE TABLE votes
@@ -68,4 +82,5 @@ CREATE TABLE votes
   --  CONSTRAINT unique_vote UNIQUE (user_nick, thread)
 );
 ALTER TABLE IF EXISTS votes ADD CONSTRAINT uniq_votes UNIQUE (user_nick, thread);
+CREATE INDEX idx_vote ON votes(thread, voice);
 
