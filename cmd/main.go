@@ -28,7 +28,7 @@ func main() {
 	db, err := pgx.NewConnPool(
 		pgx.ConnPoolConfig{
 			ConnConfig:     config,
-			MaxConnections: 10,
+			MaxConnections: 2000,
 		})
 
 	if err != nil {
@@ -46,7 +46,7 @@ func main() {
 
 	service := services.NewService(forums, threads, users, posts, votes, dbService)
 
-	handler := handlers.NewHandler(service)
+	handler := handlers.NewHandler(service, forums, users, threads, posts)
 	rout := router(handler)
 
 	err = fasthttp.ListenAndServe(":5000", redirect(rout, handler))

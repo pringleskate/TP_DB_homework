@@ -11,7 +11,8 @@ type Storage interface {
 	CreateForum(forumSlug models.ForumCreate) (forum models.Forum, err error)
 	GetDetails(forumSlug models.ForumInput) (forum models.Forum, err error)
 	UpdateThreadsCount(input models.ForumInput) (err error)
-	UpdatePostsCount(input models.ForumInput) (err error)
+	UpdatePostsCount(input models.ForumInput, posts int) (err error)
+	//UpdatePostsCount(input models.ForumInput) (err error)
 	AddUserToForum(userID int, forumID int) (err error)
 	CheckIfForumExists(input models.ForumInput) (err error)
 	GetForumID(input models.ForumInput) (ID int, err error)
@@ -75,6 +76,15 @@ func (s *storage) UpdateThreadsCount(input models.ForumInput) (err error) {
 	return
 }
 
+func (s *storage) UpdatePostsCount(input models.ForumInput, posts int) (err error) {
+	_, err = s.db.Exec("UPDATE forums SET posts = posts + $2 WHERE slug = $1", input.Slug, posts)
+	if err != nil {
+		fmt.Println(err)
+		return models.Error{Code: "500"}
+	}
+	return
+}
+/*
 func (s *storage) UpdatePostsCount(input models.ForumInput) (err error) {
 	_, err = s.db.Exec("UPDATE forums SET posts = posts + 1 WHERE slug = $1", input.Slug)
 	if err != nil {
@@ -82,7 +92,7 @@ func (s *storage) UpdatePostsCount(input models.ForumInput) (err error) {
 		return models.Error{Code: "500"}
 	}
 	return
-}
+}*/
 
 func (s *storage) AddUserToForum(userID int, forumID int) (err error) {
 	_, err = s.db.Exec("INSERT INTO forum_users (forumID, userID) VALUES ($1, $2)", forumID, userID)

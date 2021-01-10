@@ -11,7 +11,6 @@ import (
 	"github.com/pringleskate/TP_DB_homework/internal/storages/voteStorage"
 	"math"
 	"strings"
-	"time"
 )
 
 type Service interface {
@@ -30,7 +29,7 @@ type Service interface {
 	UpdateThread(input models.ThreadUpdate) (models.Thread, error)
 	GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, error)
 
-	CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error)
+//	CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error)
 	GetPost(id int, related string) (models.PostFull, error)
 	UpdatePost(input models.PostUpdate) (models.Post, error)
 
@@ -236,7 +235,7 @@ func (s service) GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, err
 	}
 	return s.postStorage.GetPostsByThread(input)
 }
-
+/*
 func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error) {
 	posts := make([]models.Post, 0)
 
@@ -249,7 +248,8 @@ func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInpu
 		return []models.Post{}, nil
 	}
 
-	created := time.Now()
+	createdTime := time.Now().Format(time.RFC3339Nano)
+	//created := time.Now()
 	for _, postInput := range input {
 		post := models.Post{
 			ThreadInput: thread,
@@ -257,7 +257,7 @@ func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInpu
 			Author:      postInput.Author,
 			Message:     postInput.Message,
 			Forum:       forum,
-			Created:     created,
+			Created:     createdTime,
 		}
 
 		if post.Parent != 0 {
@@ -301,7 +301,7 @@ func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInpu
 	}
 
 	return posts, nil
-}
+}*/
 
 func (s service) GetPost(id int, related string) (models.PostFull, error) {
 	postFull := models.PostFull{

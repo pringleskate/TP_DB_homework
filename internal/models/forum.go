@@ -126,7 +126,8 @@ type Post struct {
 	IsEdited bool   `json:"isEdited,omitempty"` // Истина, если данное сообщение было изменено.
 	Forum    string `json:"forum,omitempty"`    // Идентификатор форума (slug) данного сообещния.
 	//	Thread   int32  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
-	Created  time.Time `json:"created,omitempty"`  // Дата создания сообщения на форуме.
+	//Created  time.Time `json:"created,omitempty"`  // Дата создания сообщения на форуме.
+	Created  string `json:"created,omitempty"`
 }
 /*
 type Post struct {

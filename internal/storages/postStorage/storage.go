@@ -1,13 +1,17 @@
 package postStorage
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
+	"strconv"
+	"strings"
 )
 
 type Storage interface {
+	CreatePosts(thread models.ThreadInput, forum string, created string, posts []models.PostCreate) (post []models.Post, err error)
 	CreatePost(input models.Post) (post models.Post, err error)
 	GetPostDetails(input models.PostInput, post *models.Post) (err error)
 	UpdatePost(input models.PostUpdate) (post models.Post, err error)
@@ -23,6 +27,112 @@ func NewStorage(db *pgx.ConnPool) Storage {
 	return &storage{
 		db: db,
 	}
+}
+
+func (s storage) CreatePosts(thread models.ThreadInput, forum string, created string, posts []models.PostCreate) (post []models.Post, err error) {
+	sqlStr := "INSERT INTO posts(id, parent, thread, forum, author, created, message, path) VALUES "
+	vals := []interface{}{}
+	for _, post := range posts {
+		var authorID int
+		err = s.db.QueryRow(`SELECT id FROM users WHERE nickname = $1`,
+			post.Author,
+		).Scan(&authorID)
+		if err != nil {
+			fmt.Println("cannot find user", post.Author, err)
+			return nil, models.Error{Code: "404", Message: "cannot find user"}
+		}
+
+		var forumID int
+		err = s.db.QueryRow(`SELECT id FROM forums WHERE slug = $1`,
+			forum,
+		).Scan(&forumID)
+		if err != nil {
+			fmt.Println("cannot find forumID", forum)
+			return nil, models.Error{Code: "404", Message: "cannot find thread"}
+
+		//	return nil, errors.New("404")
+		}
+
+		sqlQuery := `
+		INSERT INTO forum_users (forumID, userID)
+		VALUES ($1,$2)`
+		_, err = s.db.Exec(sqlQuery, forumID, authorID)
+		if err != nil {
+			if pqErr, ok := err.(pgx.PgError); ok {
+				if pqErr.Code != pgerrcode.UniqueViolation {
+					return nil, errors.New("500")
+				}
+			}
+		}
+
+		if post.Parent == 0 {
+			sqlStr += "(nextval('post_id_seq'::regclass), ?, ?, ?, ?, ?, ?, " +
+				"ARRAY[currval(pg_get_serial_sequence('posts', 'id'))::INTEGER]),"
+			vals = append(vals, post.Parent, thread.ThreadID, forum, post.Author, created, post.Message)
+		} else {
+			var parentThreadId int32
+			err = s.db.QueryRow("SELECT thread FROM posts WHERE id = $1",
+				post.Parent,
+			).Scan(&parentThreadId)
+			if err != nil {
+				return nil, models.Error{Code: "409", Message: "Parent post was created in another thread"}
+
+			/*	fmt.Println("cannot find thread by post", post.Parent)
+				return nil, err*/
+			}
+			if parentThreadId != int32(thread.ThreadID) {
+				return nil, models.Error{Code: "409", Message: "Parent post was created in another thread"}
+			}
+
+			sqlStr += " (nextval('post_id_seq'::regclass), ?, ?, ?, ?, ?, ?, " +
+				"(SELECT posts.path FROM posts WHERE posts.id = ? AND posts.thread = ?) || " +
+				"currval(pg_get_serial_sequence('posts', 'id'))::INTEGER),"
+
+			vals = append(vals, post.Parent, thread.ThreadID, forum, post.Author, created, post.Message, post.Parent, thread.ThreadID)
+		}
+
+	}
+	sqlStr = strings.TrimSuffix(sqlStr, ",")
+
+	sqlStr += " RETURNING id, parent, thread, forum, author, created, message, edited "
+
+	sqlStr = ReplaceSQL(sqlStr, "?")
+	if len(posts) > 0 {
+		rows, err := s.db.Query(sqlStr, vals...)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		scanPost := models.Post{}
+		for rows.Next() {
+			err := rows.Scan(
+				&scanPost.ID,
+				&scanPost.Parent,
+				&scanPost.ThreadID,
+				&scanPost.Forum,
+				&scanPost.Author,
+				&scanPost.Created,
+				&scanPost.Message,
+				&scanPost.IsEdited,
+			)
+			if err != nil {
+				rows.Close()
+				fmt.Println(err)
+				return nil, err
+			}
+			post = append(post, scanPost)
+		}
+		rows.Close()
+	}
+	return post, nil
+}
+
+func ReplaceSQL(old, searchPattern string) string {
+	tmpCount := strings.Count(old, searchPattern)
+	for m := 1; m <= tmpCount; m++ {
+		old = strings.Replace(old, searchPattern, "$"+strconv.Itoa(m), 1)
+	}
+	return old
 }
 
 func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
@@ -45,6 +155,7 @@ func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 			return post, models.Error{Code: "500", Message: "conflict post"}
 		}
 	}
+
 	post.Author = input.Author
 	post.Created = input.Created
 	post.Forum = input.Forum
@@ -52,6 +163,7 @@ func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 	post.Parent = input.Parent
 	post.ThreadInput.ThreadID = input.ThreadInput.ThreadID
 	post.IsEdited = false
+
 	return
 }
 

@@ -20,8 +20,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a673b35d-b2ee-42db-9301-670e2b125de5" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/handlers/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/handlers/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/handlers/post.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/handlers/post.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/models/forum.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/forum.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/models/forum_easyjson.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/forum_easyjson.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/services/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/services/service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -55,7 +62,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../TP_dbms_forum" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
