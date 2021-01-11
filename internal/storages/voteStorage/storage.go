@@ -2,7 +2,6 @@ package voteStorage
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
@@ -18,7 +17,6 @@ type storage struct {
 
 }
 
-/* constructor */
 func NewStorage(db *pgx.ConnPool) Storage {
 	return &storage{
 		db: db,
@@ -38,14 +36,12 @@ func (s *storage) CreateVote(vote models.Vote, update bool) (thread models.Threa
 	boolVoice := getBoolVoice(vote)
 	tx, err := s.db.Begin()
 	if err != nil {
-		fmt.Println("txerr", err)
 		return thread, models.Error{Code: "500"}
 	}
 
 	_, err = tx.Exec("SET LOCAL synchronous_commit TO OFF")
 	if err != nil {
 		if txErr := tx.Rollback(); txErr != nil {
-			fmt.Println(txErr)
 			return thread, models.Error{Code: "500"}
 		}
 		return thread, models.Error{Code: "500"}
@@ -54,7 +50,6 @@ func (s *storage) CreateVote(vote models.Vote, update bool) (thread models.Threa
 	_, err = tx.Exec(insertVote, vote.User, boolVoice, vote.Thread.ThreadID)
 	if err != nil {
 		if txErr := tx.Rollback(); txErr != nil {
-			fmt.Println(txErr)
 			return thread, models.Error{Code: "500"}
 		}
 		if pqErr, ok := err.(pgx.PgError); ok {
@@ -90,7 +85,6 @@ func (s *storage) CreateVote(vote models.Vote, update bool) (thread models.Threa
 
 	if err != nil {
 		if txErr := tx.Rollback(); txErr != nil {
-			fmt.Println(txErr)
 			return thread, models.Error{Code: "500"}
 		}
 
@@ -102,7 +96,6 @@ func (s *storage) CreateVote(vote models.Vote, update bool) (thread models.Threa
 	}
 
 	if commitErr := tx.Commit(); commitErr != nil {
-		fmt.Println(commitErr)
 		return thread, models.Error{Code: "500"}
 	}
 

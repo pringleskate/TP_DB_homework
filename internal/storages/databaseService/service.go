@@ -15,7 +15,6 @@ type service struct {
 
 }
 
-/* constructor */
 func NewStorage(db *pgx.ConnPool) Service {
 	return &service{
 		db: db,

@@ -36,17 +36,6 @@ type Handler interface {
 	Clear(c *fasthttp.RequestCtx)
 	Status(c *fasthttp.RequestCtx)
 }
-/*
-type handler struct {
-	Service services.Service
-}
-
-func NewHandler(Service services.Service) *handler {
-	return &handler{
-		Service: Service,
-	}
-}
-*/
 
 type handler struct {
 	Service services.Service

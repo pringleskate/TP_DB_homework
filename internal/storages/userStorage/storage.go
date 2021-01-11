@@ -1,7 +1,6 @@
 package userStorage
 
 import (
-	"fmt"
 	//"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
@@ -22,7 +21,6 @@ type storage struct {
 	db *pgx.ConnPool
 }
 
-/* constructor */
 func NewStorage(db *pgx.ConnPool) Storage {
 	return &storage{
 		db: db,
@@ -70,7 +68,6 @@ func (s *storage) GetProfile(input string) (user models.User, err error) {
 				Scan(&user.Fullname, &user.Email, &user.About, &user.Nickname)
 
 	if err != nil {
-		fmt.Println(err)
 		if err == pgx.ErrNoRows {
 			return user, models.Error{Code: "404"}
 
@@ -135,7 +132,6 @@ func (s *storage) GetUsers(input models.ForumGetUsers, forumID int) (users []mod
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		return users, models.Error{Code: "500"}
 	}
 
@@ -181,7 +177,6 @@ func (s *storage) GetEmailConflictUser(email string) (user models.User, err erro
 		Scan(&user.Fullname, &user.Nickname, &user.About, &user.Email)
 
 	if err != nil {
-		fmt.Println(err)
 		if err == pgx.ErrNoRows {
 			return user, models.Error{Code: "404"}
 

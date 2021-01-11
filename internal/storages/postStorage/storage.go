@@ -2,7 +2,6 @@ package postStorage
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
@@ -38,7 +37,6 @@ func (s storage) CreatePosts(thread models.ThreadInput, forum string, created st
 			post.Author,
 		).Scan(&authorID)
 		if err != nil {
-			fmt.Println("cannot find user", post.Author, err)
 			return nil, models.Error{Code: "404", Message: "cannot find user"}
 		}
 
@@ -47,10 +45,7 @@ func (s storage) CreatePosts(thread models.ThreadInput, forum string, created st
 			forum,
 		).Scan(&forumID)
 		if err != nil {
-			fmt.Println("cannot find forumID", forum)
 			return nil, models.Error{Code: "404", Message: "cannot find thread"}
-
-		//	return nil, errors.New("404")
 		}
 
 		sqlQuery := `
@@ -76,9 +71,6 @@ func (s storage) CreatePosts(thread models.ThreadInput, forum string, created st
 			).Scan(&parentThreadId)
 			if err != nil {
 				return nil, models.Error{Code: "409", Message: "Parent post was created in another thread"}
-
-			/*	fmt.Println("cannot find thread by post", post.Parent)
-				return nil, err*/
 			}
 			if parentThreadId != int32(thread.ThreadID) {
 				return nil, models.Error{Code: "409", Message: "Parent post was created in another thread"}
@@ -100,7 +92,6 @@ func (s storage) CreatePosts(thread models.ThreadInput, forum string, created st
 	if len(posts) > 0 {
 		rows, err := s.db.Query(sqlStr, vals...)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		scanPost := models.Post{}
@@ -117,7 +108,6 @@ func (s storage) CreatePosts(thread models.ThreadInput, forum string, created st
 			)
 			if err != nil {
 				rows.Close()
-				fmt.Println(err)
 				return nil, err
 			}
 			post = append(post, scanPost)
@@ -145,7 +135,6 @@ func (s *storage) CreatePost(input models.Post) (post models.Post, err error) {
 	}
 
 	if pqErr, ok := err.(pgx.PgError); ok {
-		fmt.Println(err)
 		switch pqErr.Code {
 		case pgerrcode.UniqueViolation:
 			return post, models.Error{Code: "409", Message: "conflict post"}

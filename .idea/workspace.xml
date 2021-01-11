@@ -20,16 +20,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a673b35d-b2ee-42db-9301-670e2b125de5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/handlers/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/handlers/handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/handlers/post.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/handlers/post.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/handlers/thread.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/handlers/thread.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/init.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/models/forum.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/forum.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/models/forum_easyjson.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/forum_easyjson.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/services/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/services/service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/databaseService/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/databaseService/service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/forumStorage/storage.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/postStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/threadStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/threadStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/userStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/userStorage/storage.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/storages/voteStorage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/storages/voteStorage/storage.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

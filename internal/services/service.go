@@ -29,7 +29,6 @@ type Service interface {
 	UpdateThread(input models.ThreadUpdate) (models.Thread, error)
 	GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, error)
 
-//	CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error)
 	GetPost(id int, related string) (models.PostFull, error)
 	UpdatePost(input models.PostUpdate) (models.Post, error)
 
@@ -235,73 +234,6 @@ func (s service) GetThreadPosts(input models.ThreadGetPosts) ([]models.Post, err
 	}
 	return s.postStorage.GetPostsByThread(input)
 }
-/*
-func (s service) CreatePosts(input []models.PostCreate, thread models.ThreadInput) ([]models.Post, error) {
-	posts := make([]models.Post, 0)
-
-	forum, err := s.threadStorage.GetForumByThread(&thread)
-	if err != nil {
-		return []models.Post{}, err
-	}
-
-	if len(input) == 0 {
-		return []models.Post{}, nil
-	}
-
-	createdTime := time.Now().Format(time.RFC3339Nano)
-	//created := time.Now()
-	for _, postInput := range input {
-		post := models.Post{
-			ThreadInput: thread,
-			Parent:      postInput.Parent,
-			Author:      postInput.Author,
-			Message:     postInput.Message,
-			Forum:       forum,
-			Created:     createdTime,
-		}
-
-		if post.Parent != 0 {
-			parentThread, err := s.postStorage.CheckParentPostThread(post.Parent)
-			if err != nil {
-				fmt.Println(err)
-				return []models.Post{}, err
-			}
-
-			if parentThread != post.ThreadID  {
-				return []models.Post{}, models.Error{Code:"409"}
-			}
-		}
-
-		output, err := s.postStorage.CreatePost(post)
-		if err != nil {
-			return []models.Post{}, err
-		}
-
-		posts = append(posts, output)
-
-		err = s.forumStorage.UpdatePostsCount(models.ForumInput{Slug: forum})
-		if err != nil {
-			return []models.Post{}, err
-		}
-	}
-
-	userID, err := s.userStorage.GetUserIDByNickname(input[0].Author)
-	if err != nil {
-		return []models.Post{}, err
-	}
-
-	forumID, err := s.forumStorage.GetForumID(models.ForumInput{Slug: forum})
-	if err != nil {
-		return []models.Post{}, err
-	}
-
-	err = s.forumStorage.AddUserToForum(userID, forumID)
-	if err != nil && err.Error() != "409" {
-		return []models.Post{}, err
-	}
-
-	return posts, nil
-}*/
 
 func (s service) GetPost(id int, related string) (models.PostFull, error) {
 	postFull := models.PostFull{

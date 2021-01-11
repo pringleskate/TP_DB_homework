@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -20,7 +19,6 @@ func (h handler) ThreadCreate(c *fasthttp.RequestCtx) {
 
 	thread, err := h.Service.CreateThread(*threadInput)
 	if err != nil {
-		fmt.Println(err)
 		status, respErr, _ := h.ConvertError(err)
 		if status == fasthttp.StatusConflict {
 			response, _ := thread.MarshalJSON()

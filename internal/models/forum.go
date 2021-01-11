@@ -13,7 +13,6 @@ type RespError struct {
 type Error struct {
 	Code string `json:"-"`
 	Message string `json:"message"`
-	//Message RespError
 }
 
 func (e Error) Error() string {
@@ -93,7 +92,6 @@ type ThreadUpdate struct {
 
 type ThreadGetPosts struct {
 	ThreadInput
-	//Thread int
 	Limit int
 	Since int
 	Sort string
@@ -118,32 +116,14 @@ type PostCreate struct {
 //easyjson:json
 type Post struct {
 	ThreadInput
-	//SlagOrID string `json:"-"`
 	ID       int  `json:"id,omitempty"`       // Идентификатор данного сообщения.
 	Parent   int  `json:"parent,omitempty"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
 	Author   string `json:"author,omitempty"`   // Автор, написавший данное сообщение.
 	Message  string `json:"message,omitempty"`  // Собственно сообщение форума.
 	IsEdited bool   `json:"isEdited,omitempty"` // Истина, если данное сообщение было изменено.
 	Forum    string `json:"forum,omitempty"`    // Идентификатор форума (slug) данного сообещния.
-	//	Thread   int32  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
-	//Created  time.Time `json:"created,omitempty"`  // Дата создания сообщения на форуме.
 	Created  string `json:"created,omitempty"`
 }
-/*
-type Post struct {
-	//ThreadInput
-	ThreadID       int  `json:"id"`       // Идентификатор данного сообщения.
-	Parent   int  `json:"parent"`   // Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).
-	Author   string `json:"author"`   // Автор, написавший данное сообщение.
-	Message  string `json:"message"`  // Собственно сообщение форума.
-	IsEdited bool   `json:"isEdited"` // Истина, если данное сообщение было изменено.
-	Forum    string `json:"forum"`    // Идентификатор форума (slug) данного сообещния.
-	Thread   int  `json:"thread"`   // Идентификатор ветви (id) обсуждения данного сообещния.
-	Created  string `json:"created"`  // Дата создания сообщения на форуме.
-}
-*/
-
-//type Posts []*Post
 
 //easyjson:json
 type PostFull struct {

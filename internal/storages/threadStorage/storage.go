@@ -2,7 +2,6 @@ package threadStorage
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
 	"github.com/pringleskate/TP_DB_homework/internal/models"
@@ -116,7 +115,6 @@ func (s *storage) UpdateThread(input models.ThreadUpdate) (thread models.Thread,
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		if err == pgx.ErrNoRows {
 			return thread, models.Error{Code: "404"}
 
